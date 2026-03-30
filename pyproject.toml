@@ -8,3 +8,6 @@ dependencies = [
   "ray[default]>=2.20,<3.0",
   "streamlit>=1.43,<2.0",
 ]
+dev-dependencies = [
+  "pytest>=8.1,<9.0",
+]

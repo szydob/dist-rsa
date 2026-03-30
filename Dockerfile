@@ -10,6 +10,7 @@ COPY src ./src
 RUN uv sync --no-dev
 
 ENV PATH="/app/.venv/bin:$PATH"
+ENV PYTHONPATH="/app/src:$PYTHONPATH"
 
 EXPOSE 8501
 

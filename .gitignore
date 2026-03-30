@@ -1,0 +1,26 @@
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+*.so
+
+# Virtual env
+.venv/
+.env/
+
+# Ray
+ray_results/
+
+# Pytest
+.pytest_cache/
+
+# IDE/editor
+.vscode/
+.idea/
+.DS_Store
+
+# Build/packaging
+build/
+dist/
+*.egg-info/
