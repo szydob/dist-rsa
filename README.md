@@ -13,7 +13,7 @@ Current scope:
 - `pyproject.toml` — Python dependencies (`uv`)
 - `Dockerfile` — container image definition
 - `docker-compose.yml` — local dev orchestration
-- `src/dist_rsa/gui.py` — Streamlit interface
+- `src/gui.py` — Streamlit interface
 
 ## Prerequisites
 

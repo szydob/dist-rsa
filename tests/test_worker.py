@@ -2,8 +2,8 @@ from __future__ import annotations
 
 import ray
 
-from dist_rsa.core.models import Chunk, ChunkStatus
-from dist_rsa.core.worker import factor_chunk
+from core.models import Chunk, ChunkStatus
+from core.worker import factor_chunk
 
 
 def test_worker_finds_divisor(ray_session):

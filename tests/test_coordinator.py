@@ -1,7 +1,7 @@
 from __future__ import annotations
 
-from dist_rsa.core.coordinator import FactorizationCoordinator
-from dist_rsa.core.models import FactorizationStatus
+from core.coordinator import FactorizationCoordinator
+from core.models import FactorizationStatus
 
 
 def test_coordinator_finds_factor(ray_session):

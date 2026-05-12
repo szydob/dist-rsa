@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import pytest
 
-from dist_rsa.core.chunking import build_chunks, calculate_search_limit, iter_chunks
+from core.chunking import build_chunks, calculate_search_limit, iter_chunks
 
 
 def test_calculate_search_limit():

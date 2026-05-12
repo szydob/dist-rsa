@@ -14,4 +14,4 @@ ENV PYTHONPATH="/app/src:$PYTHONPATH"
 
 EXPOSE 8501
 
-CMD ["streamlit", "run", "src/dist_rsa/gui.py", "--server.address=0.0.0.0", "--server.port=8501"]
+CMD ["streamlit", "run", "src/gui.py", "--server.address=0.0.0.0", "--server.port=8501"]
