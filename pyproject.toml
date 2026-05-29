@@ -7,6 +7,9 @@ requires-python = ">=3.11"
 dependencies = [
   "ray[default]>=2.20,<3.0",
   "streamlit>=1.43,<2.0",
+  "fastapi>=0.100,<1.0",
+  "uvicorn>=0.23,<1.0",
+  "prometheus-client>=0.17,<1.0",
 ]
 dev-dependencies = [
   "pytest>=8.1,<9.0",

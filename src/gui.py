@@ -12,6 +12,7 @@ from core.shared.models import (
     EncryptionResult,
     EncryptionStatus,
 )
+from services.agent_pool_service import AgentPoolService
 from services.attack_service import AttackService
 from services.encryption_service import EncryptionService
 from services.decryption_service import DecryptionService
@@ -38,6 +39,12 @@ def get_decryption_service() -> DecryptionService:
     return DecryptionService()
 
 
+@st.cache_resource
+def get_agent_pool_service() -> AgentPoolService:
+    # Keep one persistent pool per Streamlit process.
+    return AgentPoolService()
+
+
 def _parse_positive_int(raw: str, field: str) -> int:
     try:
         value = int(raw)
@@ -53,8 +60,13 @@ def render() -> None:
 
     st.title("Distributed RSA System")
 
-    encrypt_tab, decrypt_tab, factor_tab, attack_tab = st.tabs(
-        ["Encrypt text", "Decrypt text", "Factorization", "RSA attack"]
+    # NOTE: agent pool initialization is handled outside the Streamlit render path
+    # to avoid initializing Ray in a Streamlit worker thread. The pool can be
+    # started at container startup (recommended) or lazily when the user opens
+    # the Agent Pool tab.
+
+    encrypt_tab, decrypt_tab, factor_tab, attack_tab, agent_pool_tab = st.tabs(
+        ["Encrypt text", "Decrypt text", "Factorization", "RSA attack", "Agent Pool Attack"]
     )
 
     with encrypt_tab:
@@ -199,7 +211,142 @@ def render() -> None:
             except Exception as exc:
                 st.error(f"Error: {exc}")
 
+    with agent_pool_tab:
+        st.markdown("### Agent Pool Attack")
+        st.info(
+            "Factorization runs on a persistent Ray agent pool. Metrics and task history are available in Grafana: http://localhost:3000 (admin/admin)"
+        )
 
+        service = get_agent_pool_service()
+
+        from concurrent.futures import ThreadPoolExecutor
+
+        if "agent_pool_executor" not in st.session_state:
+            st.session_state["agent_pool_executor"] = ThreadPoolExecutor(max_workers=1)
+
+        with st.form("agent_pool_attack_form"):
+            st.write("**Huge Number to Factorize (background):**")
+            c1, c2 = st.columns(2)
+            with c1:
+                n_input = st.text_input(
+                    "n (use presets or enter custom)",
+                    value="10000000000000037",
+                    help="Demo size is intentionally huge; adjust if you want a shorter run.",
+                )
+            with c2:
+                chunk_size_input = st.number_input("Chunk size", min_value=1, value=1000, step=1000)
+
+            submitted = st.form_submit_button("Start Pool Attack (background)")
+
+        if submitted:
+            try:
+                # read values directly from the form inputs
+                n_value = _parse_positive_int(n_input, "n")
+                chunk_size_value = _parse_positive_int(chunk_size_input, "Chunk size")
+                executor = st.session_state["agent_pool_executor"]
+                future = executor.submit(service.factor, n_value, chunk_size=chunk_size_value)
+                st.session_state["agent_pool_future"] = future
+                st.session_state["agent_pool_meta"] = {"n": n_value, "chunk_size": chunk_size_value}
+                st.session_state.pop("agent_pool_result", None)
+                st.success("Background factorization started.")
+            except Exception as exc:
+                st.error(f"Error: {exc}")
+
+        st.markdown("---")
+        _poll_agent_pool_result(service)
+
+        # Preset example numbers for easy copying/use
+        st.markdown("### Example numbers (click to load into input)")
+        presets = [
+            "91",
+            "3233",
+            "100000000000000003",
+            "100000000000000037",
+            "9999999967",
+        ]
+        cols = st.columns(len(presets))
+        for col, val in zip(cols, presets):
+            if col.button(val, key=f"preset_{val}"):
+                # store selected preset in a separate session key (not the widget key)
+                st.session_state["agent_pool_preset_selected"] = val
+        # show the selected preset for easy copy/paste
+        if st.session_state.get("agent_pool_preset_selected"):
+            st.markdown("**Selected preset (copy to input):**")
+            st.code(st.session_state.get("agent_pool_preset_selected"))
+
+        # Small debug view to help validate per-agent utilization values
+        with st.expander("Agent pool debug / utilization (raw)"):
+            try:
+                agent_details = service.get_agent_details()
+                for a in agent_details:
+                    st.write(
+                        {
+                            "agent_id": a["agent_id"],
+                            "efficiency": a["efficiency_level"],
+                            "total_jobs": a["total_jobs_completed"],
+                            "%util": a["utilization_percent"],
+                            "is_busy": a["is_busy"],
+                            "pending": a["pending_tasks"],
+                        }
+                    )
+            except Exception as exc:
+                st.write(f"Could not fetch agent details: {exc}")
+
+
+def _render_agent_pool_result(result: FactorizationResult, service: AgentPoolService) -> None:
+    """Render factorization result with agent pool stats."""
+    if result.status is FactorizationStatus.FOUND:
+        st.success(f"Factor found: p={result.p}, q={result.q}")
+    else:
+        st.warning(result.message or "No divisor found in search space")
+
+    c1, c2, c3, c4 = st.columns(4)
+    c1.metric("Elapsed (s)", f"{result.elapsed_seconds:.3f}")
+    c2.metric("Checked Chunks", str(result.checked_chunks))
+    c3.metric("Candidates Checked", str(result.checked_candidates))
+    c4.metric("Avg Speed", f"{result.checked_candidates / max(result.elapsed_seconds, 0.001):.0f} candidates/s")
+
+    # Pool stats after run
+    pool_stats_after = service.get_pool_stats()
+    st.write("**Pool Stats After Attack:**")
+    col1, col2, col3 = st.columns(3)
+    col1.metric("Total Jobs Completed (Pool)", pool_stats_after["total_jobs_completed"])
+    col2.metric(
+        "Peak Pool Utilization",
+        f"{result.peak_pool_utilization_percent or 0.0:.1f}%",
+    )
+    col3.metric("Idle Agents Now", pool_stats_after["idle_agents"])
+
+    st.caption(f"Task id: {result.task_id}")
+
+
+@st.fragment(run_every="1s")
+def _poll_agent_pool_result(service: AgentPoolService) -> None:
+    future = st.session_state.get("agent_pool_future")
+    result = st.session_state.get("agent_pool_result")
+
+    if result is not None:
+        _render_agent_pool_result(result, service)
+        return
+
+    if future is None:
+        return
+
+    try:
+        done = future.done()
+    except Exception:
+        done = False
+
+    if not done:
+        return
+
+    try:
+        result = future.result()
+        st.session_state["agent_pool_result"] = result
+        _render_agent_pool_result(result, service)
+    finally:
+        st.session_state.pop("agent_pool_future", None)
+        st.session_state.pop("agent_pool_meta", None)
 
 def _render_result(result: FactorizationResult) -> None:
     if result.status is FactorizationStatus.FOUND:

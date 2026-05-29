@@ -24,3 +24,6 @@ ray_results/
 build/
 dist/
 *.egg-info/
+
+# Runtime logs
+logs/

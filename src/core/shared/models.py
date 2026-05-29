@@ -63,6 +63,7 @@ class FactorizationResult:
 	elapsed_seconds: float
 	checked_chunks: int
 	checked_candidates: int
+	peak_pool_utilization_percent: Optional[float] = None
 	message: Optional[str] = None
 
 

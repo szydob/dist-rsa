@@ -131,7 +131,11 @@ class FactorizationCoordinator:
 							"Factor found in chunk %s: p=%s, q=%s", chunk.chunk_id, p, q
 						)
 						for leftover in running_refs:
-							ray.cancel(leftover, force=True)
+							# actor tasks (actor.method.remote) do not support force cancel; use best-effort
+							try:
+								ray.cancel(leftover)
+							except Exception:
+								pass
 						pending.clear()
 						break
 

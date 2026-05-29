@@ -6,8 +6,33 @@ services:
     shm_size: "2.5gb"
     ports:
       - "8501:8501"
+      - "9000:9000"
     volumes:
       - ./src:/app/src
+      - ./logs:/app/logs
     environment:
       - RAY_ACCEL_ENV_VAR_OVERRIDE_ON_ZERO=0
     restart: unless-stopped
+  prometheus:
+    image: prom/prometheus:latest
+    volumes:
+      - ./monitoring/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+    ports:
+      - "9090:9090"
+    networks:
+      - default
+    restart: unless-stopped
+  grafana:
+    image: grafana/grafana:latest
+    ports:
+      - "3000:3000"
+    volumes:
+      - grafana-storage:/var/lib/grafana
+      - ./monitoring/grafana/provisioning:/etc/grafana/provisioning:ro
+    environment:
+      - GF_SECURITY_ADMIN_PASSWORD=admin
+      - GF_USERS_ALLOW_SIGN_UP=false
+    restart: unless-stopped
+
+volumes:
+  grafana-storage:
