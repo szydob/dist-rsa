@@ -10,7 +10,15 @@ from core.shared.models import Chunk, ChunkResult, ChunkStatus
 
 @ray.remote
 def factor_chunk(n: int, chunk: Chunk) -> ChunkResult:
-	"""Search for a divisor of n within the provided chunk range."""
+	"""Search for a divisor of n within one chunk.
+
+	Args:
+		n: Integer to factor.
+		chunk: Search interval to evaluate.
+
+	Returns:
+		Chunk result with divisor information and runtime metadata.
+	"""
 	start_time = perf_counter()
 	divisor: Optional[int] = None
 	checked = 0

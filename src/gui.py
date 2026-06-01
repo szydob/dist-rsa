@@ -21,31 +21,47 @@ from services.factorization_service import FactorizationService
 
 @st.cache_resource
 def get_service() -> FactorizationService:
+    """Return the cached factorization service."""
     return FactorizationService()
 
 
 @st.cache_resource
 def get_attack_service() -> AttackService:
+    """Return the cached RSA attack service."""
     return AttackService()
 
 
 @st.cache_resource
 def get_encryption_service() -> EncryptionService:
+    """Return the cached encryption service."""
     return EncryptionService()
 
 
 @st.cache_resource
 def get_decryption_service() -> DecryptionService:
+    """Return the cached decryption service."""
     return DecryptionService()
 
 
 @st.cache_resource
 def get_agent_pool_service() -> AgentPoolService:
-    # Keep one persistent pool per Streamlit process.
+    """Return the cached persistent agent-pool service."""
     return AgentPoolService()
 
 
 def _parse_positive_int(raw: str, field: str) -> int:
+    """Parse a positive integer from a text input.
+
+    Args:
+        raw: Raw string value from the UI.
+        field: Human-readable field name used in validation errors.
+
+    Returns:
+        The parsed positive integer.
+
+    Raises:
+        ValueError: If the value is not a positive integer.
+    """
     try:
         value = int(raw)
     except ValueError:
@@ -56,6 +72,7 @@ def _parse_positive_int(raw: str, field: str) -> int:
 
 
 def render() -> None:
+    """Render the Streamlit application."""
     st.set_page_config(page_title="Distributed RSA", layout="wide")
 
     st.title("Distributed RSA System")
@@ -294,7 +311,12 @@ def render() -> None:
 
 
 def _render_agent_pool_result(result: FactorizationResult, service: AgentPoolService) -> None:
-    """Render factorization result with agent pool stats."""
+    """Render the agent-pool factorization result and current pool stats.
+
+    Args:
+        result: Factorization result produced by the pool.
+        service: Agent-pool service used to query live stats.
+    """
     if result.status is FactorizationStatus.FOUND:
         st.success(f"Factor found: p={result.p}, q={result.q}")
     else:
@@ -322,6 +344,7 @@ def _render_agent_pool_result(result: FactorizationResult, service: AgentPoolSer
 
 @st.fragment(run_every="1s")
 def _poll_agent_pool_result(service: AgentPoolService) -> None:
+    """Poll the background Agent Pool task and render it when complete."""
     future = st.session_state.get("agent_pool_future")
     result = st.session_state.get("agent_pool_result")
 
@@ -349,6 +372,7 @@ def _poll_agent_pool_result(service: AgentPoolService) -> None:
         st.session_state.pop("agent_pool_meta", None)
 
 def _render_result(result: FactorizationResult) -> None:
+    """Render the standard factorization result."""
     if result.status is FactorizationStatus.FOUND:
         st.success(f"Factor found: p={result.p}, q={result.q}")
     else:
@@ -363,6 +387,7 @@ def _render_result(result: FactorizationResult) -> None:
 
 
 def _render_attack_result(result: AttackResult) -> None:
+    """Render the RSA attack result."""
     if result.status is AttackStatus.COMPLETED:
         st.success("RSA attack completed successfully")
     else:
@@ -380,6 +405,7 @@ def _render_attack_result(result: AttackResult) -> None:
 
 
 def _render_encryption_result(result: EncryptionResult) -> None:
+    """Render the distributed encryption result."""
     if result.status is EncryptionStatus.COMPLETED:
         st.success(f"Encrypted text for recipient {result.recipient_id}")
     else:
@@ -415,6 +441,7 @@ def _render_encryption_result(result: EncryptionResult) -> None:
 
 
 def _render_decryption_result(result: DecryptionResult) -> None:
+    """Render the distributed decryption result."""
     if result.status is DecryptionStatus.COMPLETED:
         st.success(f"Decrypted text for owner {result.owner_id}")
     else:
@@ -445,6 +472,7 @@ def _render_decryption_result(result: DecryptionResult) -> None:
 
 
 def main() -> None:
+    """Application entry point."""
     render()
 
 

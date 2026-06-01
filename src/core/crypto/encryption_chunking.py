@@ -6,7 +6,18 @@ from core.shared.models import EncryptionChunk
 
 
 def build_encryption_chunks(payload: bytes, chunk_size: int) -> List[EncryptionChunk]:
-	"""Split bytes payload into ordered chunks for Ray workers."""
+	"""Split a byte payload into ordered encryption chunks.
+
+	Args:
+		payload: Plaintext bytes to split.
+		chunk_size: Maximum number of bytes per chunk.
+
+	Returns:
+		Ordered chunk descriptors covering the payload.
+
+	Raises:
+		ValueError: If chunk_size is not positive.
+	"""
 	if chunk_size <= 0:
 		raise ValueError("chunk_size must be positive")
 

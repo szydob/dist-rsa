@@ -1,3 +1,5 @@
+"""JSONL event log helpers for agent pool observability."""
+
 from __future__ import annotations
 
 import json
@@ -11,11 +13,18 @@ DEFAULT_EVENT_LOG_PATH = Path(os.environ.get("AGENT_POOL_EVENT_LOG_PATH", "/app/
 
 
 def _event_log_path() -> Path:
+	"""Return the event log path and ensure the parent directory exists."""
 	DEFAULT_EVENT_LOG_PATH.parent.mkdir(parents=True, exist_ok=True)
 	return DEFAULT_EVENT_LOG_PATH
 
 
 def append_event(event_type: str, **payload: Any) -> None:
+	"""Append one structured event to the JSONL event log.
+
+	Args:
+		event_type: Event name written to the log.
+		**payload: Additional structured fields to store.
+	"""
 	entry = {
 		"ts": datetime.now(timezone.utc).isoformat(),
 		"event_type": event_type,
@@ -32,6 +41,14 @@ def append_event(event_type: str, **payload: Any) -> None:
 
 
 def read_events(limit: int = 200) -> list[dict[str, Any]]:
+	"""Read the most recent structured events from the JSONL log.
+
+	Args:
+		limit: Maximum number of events to return.
+
+	Returns:
+		Newest parsed events in chronological order.
+	"""
 	path = _event_log_path()
 	if not path.exists():
 		return []

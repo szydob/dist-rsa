@@ -6,6 +6,18 @@ from core.shared.models import DecryptionChunk
 
 
 def build_decryption_chunks(ciphertext_numbers: list[int], chunk_size: int) -> List[DecryptionChunk]:
+	"""Split ciphertext integers into ordered decryption chunks.
+
+	Args:
+		ciphertext_numbers: RSA ciphertext integers to split.
+		chunk_size: Maximum number of integers per chunk.
+
+	Returns:
+		Ordered chunk descriptors covering the ciphertext.
+
+	Raises:
+		ValueError: If chunk_size is not positive.
+	"""
 	if chunk_size <= 0:
 		raise ValueError("chunk_size must be positive")
 

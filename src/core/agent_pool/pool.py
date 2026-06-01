@@ -102,9 +102,11 @@ class AgentPool:
 			).remote(agent_id, efficiency_level)
 
 	def get_idle_agent(self) -> ray.ObjectRef:
-		"""Return the agent with lowest pending tasks (round-robin fallback)."""
-		# Could implement more sophisticated load balancing here
-		# For now: simple round-robin
+		"""Return a deterministic fallback agent reference.
+
+		The pool currently exposes the first available agent when a dedicated
+		load-balancing decision is not needed.
+		"""
 		if not self.agents:
 			raise RuntimeError("No agents in pool")
 		return self.agents[len(self.agents) % len(self.agents)]

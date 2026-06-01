@@ -7,7 +7,7 @@ from core.shared.models import FactorizationResult
 
 
 class FactorizationService:
-    """Thin service layer for clients (e.g., GUI or API)."""
+    """Thin service layer for factorization clients."""
 
     def __init__(
         self,
@@ -22,7 +22,16 @@ class FactorizationService:
         workers_count: Optional[int] = None,
         chunk_size: Optional[int] = None,
     ) -> FactorizationResult:
-        """Execute factorization with optional workers_count and chunk_size overrides."""
+        """Factor an integer with optional coordinator overrides.
+
+        Args:
+            n: Integer to factor.
+            workers_count: Optional worker-count override.
+            chunk_size: Optional chunk-size override.
+
+        Returns:
+            The completed factorization result.
+        """
         if workers_count is not None and workers_count <= 0:
             raise ValueError("workers_count must be positive")
         if chunk_size is not None and chunk_size <= 0:

@@ -23,6 +23,15 @@ class EncryptionWorker:
 		self.log = get_logger(f"EncryptionWorker-{worker_id}")
 
 	def encrypt_chunk(self, chunk: EncryptionChunk, public_key: RsaPublicKey) -> EncryptionChunkResult:
+		"""Encrypt one plaintext chunk and record execution metadata.
+
+		Args:
+			chunk: Plaintext chunk to encrypt.
+			public_key: RSA public key to use.
+
+		Returns:
+			Chunk result with ciphertext integers and runtime details.
+		"""
 		start_time = perf_counter()
 		try:
 			ciphertext_numbers = encrypt_bytes(chunk.payload, public_key)

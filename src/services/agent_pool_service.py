@@ -8,7 +8,7 @@ from core.shared.models import FactorizationResult
 
 
 class AgentPoolService:
-	"""Service for factorization using persistent agent pool."""
+	"""Service facade for factorization using the persistent agent pool."""
 
 	def __init__(
 		self,
@@ -26,7 +26,15 @@ class AgentPoolService:
 		*,
 		chunk_size: Optional[int] = None,
 	) -> FactorizationResult:
-		"""Factor n using the agent pool."""
+		"""Factor n using the persistent agent pool.
+
+		Args:
+			n: Integer to factor.
+			chunk_size: Optional chunk-size override for this run.
+
+		Returns:
+			The completed factorization result.
+		"""
 		# Reset per-run statistics before starting new factorization
 		self.agent_pool.reset_all_run_statistics()
 
@@ -43,11 +51,11 @@ class AgentPoolService:
 		return temp_coordinator.factor(n)
 
 	def get_pool_stats(self) -> dict:
-		"""Get current pool statistics."""
+		"""Return the current pool statistics snapshot."""
 		return self.agent_pool.get_pool_summary()
 
 	def get_agent_details(self) -> list[dict]:
-		"""Get detailed stats for each agent."""
+		"""Return detailed statistics for each agent in the pool."""
 		stats = self.agent_pool.get_agent_stats()
 		return [
 			{

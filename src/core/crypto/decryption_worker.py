@@ -22,6 +22,15 @@ class DecryptionWorker:
 		self.log = get_logger(f"DecryptionWorker-{worker_id}")
 
 	def decrypt_chunk(self, chunk: DecryptionChunk, private_key: RsaPrivateKey) -> DecryptionChunkResult:
+		"""Decrypt one ciphertext chunk and record execution metadata.
+
+		Args:
+			chunk: Ciphertext chunk to decrypt.
+			private_key: RSA private key to use.
+
+		Returns:
+			Chunk result with plaintext bytes and runtime details.
+		"""
 		start_time = perf_counter()
 		try:
 			plaintext_bytes = bytes(pow(value, private_key.d, private_key.n) for value in chunk.payload)

@@ -23,7 +23,7 @@ from utils.logger import get_logger
 
 
 class EncryptionCoordinator:
-	"""Coordinates distributed RSA encryption on Ray."""
+	"""Coordinate distributed RSA encryption on Ray."""
 
 	def __init__(
 		self,
@@ -59,6 +59,15 @@ class EncryptionCoordinator:
 			)
 
 	def encrypt(self, plaintext: str, recipient_id: str) -> EncryptionResult:
+		"""Encrypt plaintext for a recipient using distributed Ray workers.
+
+		Args:
+			plaintext: Message to encrypt.
+			recipient_id: Recipient identifier in the key store.
+
+		Returns:
+			The completed encryption result.
+		"""
 		if not plaintext:
 			raise ValueError("plaintext must not be empty")
 

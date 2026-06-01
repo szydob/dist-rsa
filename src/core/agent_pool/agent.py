@@ -12,6 +12,8 @@ from core.shared.models import ChunkResult, ChunkStatus
 
 
 class EfficiencyLevel(str, Enum):
+	"""Relative execution speeds used by the agent pool."""
+
 	NORMAL = "normal"  # 70% of agents, 1.0x speed
 	FAST = "fast"      # 20% of agents, 3.0x speed
 	SLOW = "slow"      # 10% of agents, 0.5x speed
@@ -19,6 +21,8 @@ class EfficiencyLevel(str, Enum):
 
 @dataclass
 class AgentStats:
+	"""Snapshot of one agent's current pool statistics."""
+
 	agent_id: int
 	efficiency_level: EfficiencyLevel
 	total_jobs_completed: int = 0
@@ -50,7 +54,11 @@ class PoolAgent:
 		self.STICKY_ACTIVE_DURATION = 2.0  # report 100% for 2s after task completes
 
 	def _get_efficiency_multiplier(self) -> float:
-		"""Return speed multiplier based on efficiency level."""
+		"""Return the speed multiplier for the current efficiency level.
+
+		Returns:
+			Numeric multiplier used to model relative worker speed.
+		"""
 		if self.efficiency_level == EfficiencyLevel.FAST:
 			return 3.0
 		elif self.efficiency_level == EfficiencyLevel.SLOW:
@@ -59,7 +67,16 @@ class PoolAgent:
 			return 1.0
 
 	def factor_chunk(self, n: int, chunk_start: int, chunk_end: int) -> ChunkResult:
-		"""Search for divisor in chunk range with efficiency multiplier."""
+		"""Search for a divisor within the assigned chunk range.
+
+		Args:
+			n: Integer to factor.
+			chunk_start: Inclusive start of the search interval.
+			chunk_end: Inclusive end of the search interval.
+
+		Returns:
+			Chunk result with divisor information and runtime metadata.
+		"""
 		append_event(
 			"chunk_started",
 			agent_id=self.agent_id,
@@ -127,7 +144,7 @@ class PoolAgent:
 		)
 
 	def get_stats(self) -> AgentStats:
-		"""Return current agent statistics."""
+		"""Return a snapshot of the current agent statistics."""
 		# Compute utilization: 100% if busy OR recently completed (sticky active)
 		now = perf_counter()
 		is_recently_active = (now - self.last_completed_time) < self.STICKY_ACTIVE_DURATION
@@ -144,7 +161,7 @@ class PoolAgent:
 		)
 
 	def reset_run_statistics(self) -> None:
-		"""Reset per-run metrics (pending tasks, busy state, recent completion time)."""
+		"""Reset per-run metrics for a new factorization run."""
 		self.pending_tasks = 0
 		self.is_busy = False
 		self.last_completed_time = 0.0

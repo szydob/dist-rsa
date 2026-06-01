@@ -23,7 +23,7 @@ from utils.logger import get_logger
 
 
 class DecryptionCoordinator:
-	"""Coordinates distributed RSA decryption on Ray."""
+	"""Coordinate distributed RSA decryption on Ray."""
 
 	def __init__(
 		self,
@@ -59,6 +59,15 @@ class DecryptionCoordinator:
 			)
 
 	def decrypt(self, ciphertext_numbers: list[int], owner_id: str) -> DecryptionResult:
+		"""Decrypt ciphertext numbers using distributed Ray workers.
+
+		Args:
+			ciphertext_numbers: RSA ciphertext integers to decrypt.
+			owner_id: Owner identifier in the key store.
+
+		Returns:
+			The completed decryption result.
+		"""
 		if not ciphertext_numbers:
 			raise ValueError("ciphertext_numbers must not be empty")
 

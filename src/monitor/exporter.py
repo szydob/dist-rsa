@@ -1,3 +1,5 @@
+"""Prometheus exporter and event endpoint for agent pool monitoring."""
+
 from __future__ import annotations
 
 import asyncio
@@ -34,6 +36,7 @@ AGENT_JOBS = Gauge(
 
 
 def collect_metrics(service: AgentPoolService) -> None:
+    """Refresh Prometheus gauges from the current agent pool state."""
     try:
         stats = service.get_pool_stats()
     except Exception:
@@ -55,6 +58,7 @@ def collect_metrics(service: AgentPoolService) -> None:
 
 @app.get("/metrics")
 async def metrics() -> Response:
+    """Return the latest Prometheus metrics payload."""
     service = get_service()
     collect_metrics(service)
     data = generate_latest(REGISTRY)
@@ -65,6 +69,7 @@ _service_instance: AgentPoolService | None = None
 
 
 def get_service() -> AgentPoolService:
+    """Return the shared AgentPoolService instance used by the exporter."""
     global _service_instance
     if _service_instance is None:
         _service_instance = AgentPoolService()
@@ -73,6 +78,7 @@ def get_service() -> AgentPoolService:
 
 @app.get("/events")
 async def events(limit: int = 200):
+    """Return the most recent agent-pool events."""
     return read_events(limit=limit)
 
 

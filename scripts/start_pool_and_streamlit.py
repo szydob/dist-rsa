@@ -1,4 +1,6 @@
 #!/usr/bin/env python3
+"""Bootstrap the local Ray, exporter, AgentPool, and Streamlit stack."""
+
 from __future__ import annotations
 
 import os
@@ -12,6 +14,7 @@ from core.agent_pool.pool import AgentPool
 
 
 def _start_ray_head() -> subprocess.Popen[str]:
+    """Start a local Ray head process for the containerized stack."""
     env = os.environ.copy()
     env.setdefault("RAY_DISABLE_USAGE_STATS", "1")
     env.setdefault("RAY_ADDRESS", "auto")
@@ -31,6 +34,7 @@ def _start_ray_head() -> subprocess.Popen[str]:
 
 
 def main() -> None:
+    """Boot Ray, the agent pool, metrics exporter, and the Streamlit app."""
     os.environ.setdefault("RAY_ADDRESS", "auto")
     ray_head = _start_ray_head()
 

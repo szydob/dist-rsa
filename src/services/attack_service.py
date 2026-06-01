@@ -9,7 +9,7 @@ from services.factorization_service import FactorizationService
 
 
 class AttackService:
-    """Simulates an RSA attack by factoring n and recovering the private exponent d."""
+    """Simulate an RSA attack by factoring n and recovering d."""
 
     def __init__(self, factorization_service: FactorizationService | None = None) -> None:
         self.factorization_service = factorization_service or FactorizationService()
@@ -22,6 +22,20 @@ class AttackService:
         workers_count: int | None = None,
         chunk_size: int | None = None,
     ) -> AttackResult:
+        """Run factorization and derive the private exponent from the result.
+
+        Args:
+            n: RSA modulus to attack.
+            e: Public exponent.
+            workers_count: Optional override for the distributed factorizer.
+            chunk_size: Optional override for divisor-search chunk size.
+
+        Returns:
+            The completed attack result with recovered RSA parameters.
+
+        Raises:
+            ValueError: If the provided inputs are invalid.
+        """
         if n <= 3:
             raise ValueError("n must be greater than 3")
         if e <= 1:

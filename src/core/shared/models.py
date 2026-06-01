@@ -1,3 +1,5 @@
+"""Shared dataclasses and status enums used across the application."""
+
 from __future__ import annotations
 
 from dataclasses import dataclass, field
@@ -8,6 +10,8 @@ from uuid import uuid4
 
 
 class FactorizationStatus(str, Enum):
+	"""Lifecycle states for factorization tasks."""
+
 	PENDING = "pending"
 	RUNNING = "running"
 	FOUND = "found"
@@ -17,6 +21,8 @@ class FactorizationStatus(str, Enum):
 
 
 class ChunkStatus(str, Enum):
+	"""Lifecycle states for factorization chunks."""
+
 	PENDING = "pending"
 	RUNNING = "running"
 	COMPLETED = "completed"
@@ -26,6 +32,8 @@ class ChunkStatus(str, Enum):
 
 @dataclass
 class FactorizationTask:
+	"""Metadata for a factorization job."""
+
 	n: int
 	chunk_size: int
 	search_limit: int
@@ -36,6 +44,8 @@ class FactorizationTask:
 
 @dataclass
 class Chunk:
+	"""Search interval assigned to a worker or actor."""
+
 	chunk_id: int
 	start: int
 	end: int
@@ -44,6 +54,8 @@ class Chunk:
 
 @dataclass
 class ChunkResult:
+	"""Result of evaluating a factorization chunk."""
+
 	chunk_id: int
 	start: int
 	end: int
@@ -56,6 +68,8 @@ class ChunkResult:
 
 @dataclass
 class FactorizationResult:
+	"""Summary returned after a factorization run completes."""
+
 	task_id: str
 	status: FactorizationStatus
 	p: Optional[int]
@@ -68,6 +82,8 @@ class FactorizationResult:
 
 
 class EncryptionStatus(str, Enum):
+	"""Lifecycle states for encryption tasks."""
+
 	PENDING = "pending"
 	RUNNING = "running"
 	COMPLETED = "completed"
@@ -75,6 +91,8 @@ class EncryptionStatus(str, Enum):
 
 
 class EncryptionChunkStatus(str, Enum):
+	"""Lifecycle states for encryption chunks."""
+
 	PENDING = "pending"
 	RUNNING = "running"
 	COMPLETED = "completed"
@@ -83,6 +101,8 @@ class EncryptionChunkStatus(str, Enum):
 
 @dataclass(frozen=True)
 class RsaPublicKey:
+	"""RSA public key descriptor used for encryption."""
+
 	key_id: str
 	owner_id: str
 	n: int
@@ -91,6 +111,8 @@ class RsaPublicKey:
 
 @dataclass(frozen=True)
 class RsaPrivateKey:
+	"""RSA private key descriptor used for decryption."""
+
 	key_id: str
 	owner_id: str
 	n: int
@@ -99,6 +121,8 @@ class RsaPrivateKey:
 
 @dataclass
 class EncryptionTask:
+	"""Metadata for a distributed encryption job."""
+
 	recipient_id: str
 	chunk_size: int
 	workers_count: int
@@ -110,6 +134,8 @@ class EncryptionTask:
 
 @dataclass
 class EncryptionChunk:
+	"""A byte range prepared for RSA encryption."""
+
 	chunk_id: int
 	start: int
 	end: int
@@ -119,6 +145,8 @@ class EncryptionChunk:
 
 @dataclass
 class EncryptionChunkResult:
+	"""Result of encrypting one plaintext chunk."""
+
 	chunk_id: int
 	start: int
 	end: int
@@ -132,6 +160,8 @@ class EncryptionChunkResult:
 
 @dataclass
 class EncryptionResult:
+	"""Summary returned after distributed encryption finishes."""
+
 	task_id: str
 	status: EncryptionStatus
 	recipient_id: str
@@ -146,6 +176,8 @@ class EncryptionResult:
 
 
 class DecryptionStatus(str, Enum):
+	"""Lifecycle states for decryption tasks."""
+
 	PENDING = "pending"
 	RUNNING = "running"
 	COMPLETED = "completed"
@@ -153,6 +185,8 @@ class DecryptionStatus(str, Enum):
 
 
 class DecryptionChunkStatus(str, Enum):
+	"""Lifecycle states for decryption chunks."""
+
 	PENDING = "pending"
 	RUNNING = "running"
 	COMPLETED = "completed"
@@ -161,6 +195,8 @@ class DecryptionChunkStatus(str, Enum):
 
 @dataclass
 class DecryptionTask:
+	"""Metadata for a distributed decryption job."""
+
 	owner_id: str
 	chunk_size: int
 	workers_count: int
@@ -172,6 +208,8 @@ class DecryptionTask:
 
 @dataclass
 class DecryptionChunk:
+	"""A ciphertext slice prepared for RSA decryption."""
+
 	chunk_id: int
 	start: int
 	end: int
@@ -181,6 +219,8 @@ class DecryptionChunk:
 
 @dataclass
 class DecryptionChunkResult:
+	"""Result of decrypting one ciphertext chunk."""
+
 	chunk_id: int
 	start: int
 	end: int
@@ -194,6 +234,8 @@ class DecryptionChunkResult:
 
 @dataclass
 class DecryptionResult:
+	"""Summary returned after distributed decryption finishes."""
+
 	task_id: str
 	status: DecryptionStatus
 	owner_id: str
@@ -208,6 +250,8 @@ class DecryptionResult:
 
 
 class AttackStatus(str, Enum):
+	"""Lifecycle states for RSA attack runs."""
+
 	PENDING = "pending"
 	RUNNING = "running"
 	COMPLETED = "completed"
@@ -216,6 +260,8 @@ class AttackStatus(str, Enum):
 
 @dataclass
 class AttackResult:
+	"""Summary returned after an RSA attack run finishes."""
+
 	task_id: str
 	status: AttackStatus
 	n: int

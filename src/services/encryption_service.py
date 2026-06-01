@@ -8,7 +8,7 @@ from core.shared.models import EncryptionResult
 
 
 class EncryptionService:
-    """Thin service layer for clients that want distributed RSA encryption."""
+    """Thin service layer for distributed RSA encryption."""
 
     def __init__(
         self,
@@ -19,6 +19,7 @@ class EncryptionService:
         self.coordinator = coordinator or EncryptionCoordinator(key_store=self.key_store)
 
     def list_recipients(self) -> list[str]:
+        """Return the available encryption recipients."""
         return self.key_store.list_public_recipients()
 
     def encrypt(
@@ -29,6 +30,17 @@ class EncryptionService:
         workers_count: Optional[int] = None,
         chunk_size: Optional[int] = None,
     ) -> EncryptionResult:
+        """Encrypt plaintext for a recipient using the configured coordinator.
+
+        Args:
+            plaintext: Message to encrypt.
+            recipient_id: Recipient identifier from the key store.
+            workers_count: Optional override for worker count.
+            chunk_size: Optional override for chunk size.
+
+        Returns:
+            The completed encryption result.
+        """
         if workers_count is None and chunk_size is None:
             return self.coordinator.encrypt(plaintext, recipient_id)
 

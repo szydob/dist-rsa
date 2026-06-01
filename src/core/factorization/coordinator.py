@@ -23,7 +23,7 @@ from utils.logger import get_logger
 
 
 class FactorizationCoordinator:
-	"""Coordinates distributed factorization tasks on Ray."""
+	"""Coordinate distributed factorization tasks on Ray."""
 
 	def __init__(
 		self,
@@ -57,6 +57,14 @@ class FactorizationCoordinator:
 			)
 
 	def factor(self, n: int) -> FactorizationResult:
+		"""Factor n using distributed Ray workers.
+
+		Args:
+			n: Integer to factor.
+
+		Returns:
+			The completed factorization result.
+		"""
 		if n <= 3:
 			raise ValueError("n must be greater than 3")
 

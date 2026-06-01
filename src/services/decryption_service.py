@@ -8,7 +8,7 @@ from core.shared.models import DecryptionResult
 
 
 class DecryptionService:
-    """Thin service layer for clients that want distributed RSA decryption."""
+    """Thin service layer for distributed RSA decryption."""
 
     def __init__(
         self,
@@ -19,6 +19,7 @@ class DecryptionService:
         self.coordinator = coordinator or DecryptionCoordinator(key_store=self.key_store)
 
     def list_owners(self) -> list[str]:
+        """Return the available decryption owners."""
         return self.key_store.list_private_owners()
 
     def decrypt(
@@ -29,6 +30,17 @@ class DecryptionService:
         workers_count: Optional[int] = None,
         chunk_size: Optional[int] = None,
     ) -> DecryptionResult:
+        """Decrypt ciphertext integers for an owner using the configured coordinator.
+
+        Args:
+            ciphertext_numbers: RSA ciphertext integers to decrypt.
+            owner_id: Owner identifier from the key store.
+            workers_count: Optional override for worker count.
+            chunk_size: Optional override for chunk size.
+
+        Returns:
+            The completed decryption result.
+        """
         if workers_count is None and chunk_size is None:
             return self.coordinator.decrypt(ciphertext_numbers, owner_id)
 
